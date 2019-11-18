@@ -1727,25 +1727,26 @@ public class TelephonyProvider extends ContentProvider
             }
         }
 
-        if (match != URL_SIMINFO) {
-            // Determine if we need to do a check for fields in the selection
-            boolean selectionOrSortContainsSensitiveFields;
-            try {
-                selectionOrSortContainsSensitiveFields = containsSensitiveFields(selection);
-                selectionOrSortContainsSensitiveFields |= containsSensitiveFields(sort);
-            } catch (Exception e) {
-                // Malformed sql, check permission anyway.
-                selectionOrSortContainsSensitiveFields = true;
-            }
+        // Determine if we need to do a check for fields in the selection
+        boolean selectionOrSortContainsSensitiveFields;
+        try {
+            selectionOrSortContainsSensitiveFields = containsSensitiveFields(selection);
+            selectionOrSortContainsSensitiveFields |= containsSensitiveFields(sort);
+        } catch (Exception e) {
+            // Malformed sql, check permission anyway.
+            selectionOrSortContainsSensitiveFields = true;
+        }
 
-            if (selectionOrSortContainsSensitiveFields) {
-                try {
-                    checkPermission();
-                } catch (SecurityException e) {
-                    EventLog.writeEvent(0x534e4554, "124107808", Binder.getCallingUid());
-                    throw e;
-                }
+        if (selectionOrSortContainsSensitiveFields) {
+            try {
+                checkPermission();
+            } catch (SecurityException e) {
+                EventLog.writeEvent(0x534e4554, "124107808", Binder.getCallingUid());
+                throw e;
             }
+        }
+
+        if (match != URL_SIMINFO) {
             if (projectionIn != null) {
                 for (String column : projectionIn) {
                     if (TYPE.equals(column) ||
